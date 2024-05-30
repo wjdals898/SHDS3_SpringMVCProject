@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shinhan.emp">
+  <select id="loginCheck" parameterType="map" resultType="empvo">
+  	select employee_id, first_name, last_name, phone_number 
+  	from employees 
+  	where email = #{email} and phone_number = #{phone}
+  </select>
+  <select id="selectAll" resultType="org.firstzone.myapp.emp.EmpDTO">
+    select * from employees
+  </select>
+  <select id="selectAllJob" resultType="org.firstzone.myapp.emp.JobDTO">
+  	select * from jobs
+  </select>
+  <select id="selectAllManager" resultType="map">
+  	select employee_id "employee_id", first_name || ' ' || last_name "fullname"
+  	from employees
+  	where employee_id in (
+  		select distinct manager_id
+  		from employees
+  		where manager_id is not null)
+  </select>
+  <select id="selectById" parameterType="int" resultType="empvo">
+    select * from employees where employee_id = #{aa}
+  </select>
+  <select id="selectByEmail" parameterType="string" resultType="int">
+    select 1 from employees where email = #{aa}
+  </select>
+  <select id="selectByDepartmentId" parameterType="int" resultType="empvo">
+    select * from employees where department_id = #{aa}
+  </select>
+  <select id="selectByDepartmentId2" parameterType="list" resultType="empvo">
+    select * from employees where department_id in
+    <foreach collection="list" item="item" open="(" close=")" separator=",">
+    	#{item}
+    </foreach>
+    order by 1 asc
+  </select>
+  <select id="selectByJobId" parameterType="string" resultType="empvo">
+    select * from employees where job_id like #{aa}
+  </select>
+  <select id="selectByCondition" parameterType="map" resultType="empvo">
+  	select *
+  	from employees
+  	where 1=1
+  		<if test="deptid != 0 and deptid != null">
+  			and department_id = #{deptid}
+  		</if>
+  		<if test="jobid != 'all' and jobid != null">
+  			and job_id = #{jobid}
+  		</if>
+  		<if test="hdate != null">
+  			and hire_date >= #{hdate}
+  		</if>
+  		<if test="salary != null">
+  			and salary >= #{salary}
+  		</if>
+  	order by 1
+  </select>
+  <insert id="empInsert" parameterType="empvo">
+  	insert into employees(employee_id, first_name, last_name, email, phone_number, hire_date, job_id, salary, commission_pct, manager_id, department_id) 
+  		values(#{employee_id},#{first_name},#{last_name},#{email},#{phone_number},#{hire_date},#{job_id},#{salary},#{commission_pct},
+  			<if test="manager_id == 0">null,</if>
+  			<if test="manager_id != 0">#{manager_id},</if>
+  			<if test="department_id == 0">null</if>
+  			<if test="department_id != 0">#{department_id}</if>
+  		)
+  </insert>
+  <update id="empUpdate" parameterType="empvo">
+  	update employees 
+  	set
+  		FIRST_NAME= #{first_name},
+  		LAST_NAME=#{last_name},
+  		EMAIL=#{email},
+  		PHONE_NUMBER=#{phone_number},
+  		HIRE_DATE=#{hire_date},
+  		JOB_ID=#{job_id},
+  		SALARY=#{salary},
+  		COMMISSION_PCT=#{commission_pct},
+  		MANAGER_ID=
+  		<if test="manager_id==0">null,</if>
+  		<if test="manager_id!=0">#{manager_id},</if>
+  		DEPARTMENT_ID=
+  		<if test="department_id==0">null</if>
+  		<if test="department_id!=0">#{department_id}</if>
+  	where EMPLOYEE_ID=#{employee_id}
+  </update>
+  <delete id="empDelete" parameterType="int">
+  	delete from employees where EMPLOYEE_ID=#{aa}
+  </delete>
+</mapper>
